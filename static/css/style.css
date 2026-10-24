@@ -1,0 +1,305 @@
+/* ====================================================================
+   NIVORA — Light Purple & Royal Elegant Civic Utility Theme
+   Palette:
+     Primary Royal Purple:   #5B21B6
+     Secondary Purple:       #7C3AED
+     Elegant Lavender:       #A78BFA
+     Light Purple:           #EDE9FE
+     Soft Lavender Bg:       #F5F3FF
+     Pure White:             #FFFFFF
+     Dark Royal Navy Text:   #1E1B4B
+     Muted Text:             #6B7280
+     Light Purple Border:    #DDD6FE
+   ==================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+    --primary-royal-purple: #5B21B6;
+    --secondary-purple:     #7C3AED;
+    --elegant-lavender:     #A78BFA;
+    --light-purple:         #EDE9FE;
+    --soft-lavender-bg:     #F5F3FF;
+    --pure-white:           #FFFFFF;
+    --dark-royal-navy:      #1E1B4B;
+    --muted-text:           #6B7280;
+    --light-purple-border:  #DDD6FE;
+    
+    --royal-gradient:       linear-gradient(135deg, #5B21B6 0%, #7C3AED 100%);
+    --royal-gradient-hover: linear-gradient(135deg, #4C1D95 0%, #6D28D9 100%);
+    --lavender-hero-bg:     linear-gradient(180deg, #F5F3FF 0%, #FFFFFF 100%);
+    --soft-card-shadow:     0 4px 20px -2px rgba(91, 33, 182, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+    --hover-card-shadow:    0 12px 30px -4px rgba(91, 33, 182, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--soft-lavender-bg);
+    color: var(--dark-royal-navy);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Serif font for marketing hero titles & high-impact headings */
+.font-serif-royal {
+    font-family: 'Playfair Display', Georgia, serif;
+}
+
+code, .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* Custom Scrollbars in Royal Theme */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #F5F3FF;
+}
+::-webkit-scrollbar-thumb {
+    background: #DDD6FE;
+    border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #A78BFA;
+}
+
+/* Card Foundations */
+.royal-card {
+    background: var(--pure-white);
+    border: 1px solid var(--light-purple-border);
+    border-radius: 1rem;
+    box-shadow: var(--soft-card-shadow);
+    transition: all 0.25s ease;
+}
+
+.royal-card:hover {
+    box-shadow: var(--hover-card-shadow);
+}
+
+/* Button Styling System */
+.btn-royal-primary {
+    background: var(--royal-gradient);
+    color: var(--pure-white);
+    border: none;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 14px rgba(91, 33, 182, 0.25);
+    transition: all 0.2s ease;
+}
+.btn-royal-primary:hover {
+    background: var(--royal-gradient-hover);
+    box-shadow: 0 6px 20px rgba(91, 33, 182, 0.35);
+    transform: translateY(-1px);
+}
+.btn-royal-primary:active {
+    transform: translateY(0);
+}
+
+.btn-royal-secondary {
+    background: var(--pure-white);
+    color: var(--primary-royal-purple);
+    border: 1.5px solid var(--light-purple-border);
+    font-weight: 600;
+    border-radius: 0.75rem;
+    transition: all 0.2s ease;
+}
+.btn-royal-secondary:hover {
+    background: var(--light-purple);
+    border-color: var(--elegant-lavender);
+    color: #4C1D95;
+    transform: translateY(-1px);
+}
+
+/* Form Controls & Inputs */
+input[type="text"],
+input[type="number"],
+input[type="datetime-local"],
+input[type="email"],
+input[type="password"],
+select,
+textarea {
+    background-color: var(--pure-white);
+    border: 1.5px solid var(--light-purple-border);
+    color: var(--dark-royal-navy);
+    border-radius: 0.75rem;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--secondary-purple) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.3) !important;
+}
+
+/* GIS Map Container */
+#gis-map {
+    height: 480px;
+    width: 100%;
+    border-radius: 1rem;
+    border: 1.5px solid var(--light-purple-border);
+    box-shadow: var(--soft-card-shadow);
+    z-index: 10;
+}
+
+/* Animations */
+@keyframes pulseLavender {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(124, 58, 237, 0);
+    }
+}
+
+.cluster-pulse {
+    animation: pulseLavender 2.5s infinite;
+}
+
+/* Semantic Badges — Preserving Accessible Distinction */
+.badge-critical {
+    background-color: #FEF2F2;
+    color: #991B1B;
+    border: 1px solid #FECACA;
+}
+.badge-high {
+    background-color: #FFF7ED;
+    color: #C2410C;
+    border: 1px solid #FED7AA;
+}
+.badge-medium {
+    background-color: #FEFCE8;
+    color: #854D0E;
+    border: 1px solid #FEF08A;
+}
+.badge-low {
+    background-color: #F5F3FF;
+    color: #5B21B6;
+    border: 1px solid #DDD6FE;
+}
+
+.badge-submitted {
+    background-color: #EDE9FE;
+    color: #5B21B6;
+    border: 1px solid #DDD6FE;
+}
+.badge-clustered {
+    background-color: #F5F3FF;
+    color: #6D28D9;
+    border: 1px solid #DDD6FE;
+}
+.badge-assigned {
+    background-color: #EFF6FF;
+    color: #1D4ED8;
+    border: 1px solid #BFDBFE;
+}
+.badge-in_progress {
+    background-color: #F5F3FF;
+    color: #7C3AED;
+    border: 1px solid #DDD6FE;
+}
+.badge-resolved {
+    background-color: #ECFDF5;
+    color: #047857;
+    border: 1px solid #A7F3D0;
+}
+.badge-closed {
+    background-color: #F8FAFC;
+    color: #334155;
+    border: 1px solid #CBD5E1;
+}
+
+/* Multi-Step Wizard Indicator */
+.step-indicator {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.step-circle {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.step-circle.active {
+    background: var(--royal-gradient);
+    color: var(--pure-white);
+    box-shadow: 0 4px 12px rgba(91, 33, 182, 0.35);
+}
+
+.step-circle.completed {
+    background: var(--light-purple);
+    color: var(--primary-royal-purple);
+    border: 1.5px solid var(--elegant-lavender);
+}
+
+.step-circle.pending {
+    background: #F3F4F6;
+    color: #9CA3AF;
+    border: 1.5px solid #E5E7EB;
+}
+
+.step-line {
+    flex-grow: 1;
+    height: 3px;
+    background-color: var(--light-purple-border);
+    margin: 0 0.75rem;
+    transition: background-color 0.3s ease;
+}
+
+.step-line.completed {
+    background-color: var(--secondary-purple);
+}
+
+/* Category Selection Card in Wizard */
+.category-option-card {
+    background-color: var(--pure-white);
+    border: 1.5px solid var(--light-purple-border);
+    border-radius: 0.875rem;
+    padding: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.category-option-card:hover {
+    border-color: var(--elegant-lavender);
+    background-color: #FAF5FF;
+    transform: translateY(-1px);
+}
+
+.category-option-card.selected {
+    border-color: var(--secondary-purple);
+    background-color: #F5F3FF;
+    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
+}
+
+/* Print Styles for PDF / Executive Reports */
+@media print {
+    header, #role-banner, nav, .btn-royal-primary, .btn-royal-secondary, #clustering-toast {
+        display: none !important;
+    }
+    body {
+        background: #FFFFFF !important;
+        color: #000000 !important;
+    }
+    .royal-card {
+        box-shadow: none !important;
+        border: 1px solid #CCCCCC !important;
+        page-break-inside: avoid;
+    }
+}
+
+/* Focus outline for keyboard navigation */
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 2px solid var(--secondary-purple) !important;
+    outline-offset: 2px !important;
+}

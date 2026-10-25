@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIVORA — Intelligent Civic Water Supply Management System</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        royal: {
+                            50: '#F5F3FF',   /* Soft Lavender Background */
+                            100: '#EDE9FE',  /* Light Purple */
+                            200: '#DDD6FE',  /* Light Purple Border */
+                            300: '#C4B5FD',
+                            400: '#A78BFA',  /* Elegant Lavender */
+                            500: '#8B5CF6',
+                            600: '#7C3AED',  /* Secondary Purple */
+                            700: '#5B21B6',  /* Primary Royal Purple */
+                            800: '#4C1D95',
+                            900: '#1E1B4B',  /* Dark Royal Navy for Text */
+                        },
+                        navy: {
+                            900: '#1E1B4B',
+                            800: '#2E285F',
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Playfair Display', 'Georgia', 'serif'],
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Leaflet GIS Map CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Custom Style Sheet (Royal Purple & Light Lavender Theme) -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-[#F5F3FF] text-[#1E1B4B] min-h-screen flex flex-col antialiased selection:bg-purple-200 selection:text-purple-900">
+
+    <!-- ================================================================= -->
+    <!-- TOP NAVIGATION BAR                                                -->
+    <!-- ================================================================= -->
+    <header class="bg-white/95 backdrop-blur-md border-b border-[#DDD6FE] sticky top-0 z-50 shadow-sm transition-all">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                
+                <!-- Brand Identity with Purple Gradient Water Droplet -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('landing')">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#5B21B6] via-[#7C3AED] to-[#A78BFA] flex items-center justify-center text-white shadow-md shadow-purple-500/25 ring-2 ring-purple-200">
+                        <i data-lucide="droplet" class="w-6 h-6 fill-white"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xl font-extrabold tracking-tight text-[#1E1B4B]">NIVORA</span>
+                            <span class="px-2 py-0.5 text-[10px] font-semibold bg-[#EDE9FE] text-[#5B21B6] rounded-full border border-[#DDD6FE] uppercase tracking-wider">Civic Water Utility</span>
+                        </div>
+                        <p class="text-[11px] text-[#6B7280] hidden sm:block">Intelligent Water Supply Complaint Management</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Links & Role Portals -->
+                <nav aria-label="Main Navigation" class="hidden md:flex items-center space-x-1 bg-[#F5F3FF] p-1 rounded-xl border border-[#DDD6FE] text-xs font-medium">
+                    <button id="nav-btn-landing" onclick="switchView('landing')" class="nav-item-btn px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-all text-[#6B7280] hover:text-[#5B21B6]">
+                        <i data-lucide="home" class="w-3.5 h-3.5"></i>
+                        <span>Overview</span>
+                    </button>
+                    <button id="role-btn-resident" onclick="switchRole('resident')" class="role-btn nav-item-btn px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-all bg-white text-[#5B21B6] font-semibold shadow-sm">
+                        <i data-lucide="user" class="w-3.5 h-3.5"></i>
+                        <span>Resident Portal</span>
+                    </button>
+                    <button id="role-btn-admin" onclick="switchRole('admin')" class="role-btn nav-item-btn px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-all text-[#6B7280] hover:text-[#5B21B6]">
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                        <span>Administrator</span>
+                    </button>
+                    <button id="role-btn-technician" onclick="switchRole('technician')" class="role-btn nav-item-btn px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-all text-[#6B7280] hover:text-[#5B21B6]">
+                        <i data-lucide="wrench" class="w-3.5 h-3.5"></i>
+                        <span>Service Team</span>
+                    </button>
+                    <button id="nav-btn-reports" onclick="switchView('reports')" class="nav-item-btn px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-all text-[#6B7280] hover:text-[#5B21B6]">
+                        <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+                        <span>Reports & SLA</span>
+                    </button>
+                </nav>
+
+                <!-- Auth / Role Preset Trigger -->
+                <div class="flex items-center space-x-2">
+                    <button onclick="openAuthModal()" class="px-3.5 py-1.5 bg-white text-[#5B21B6] border border-[#DDD6FE] hover:bg-[#EDE9FE] text-xs font-semibold rounded-xl shadow-xs transition flex items-center space-x-1.5">
+                        <i data-lucide="key-round" class="w-3.5 h-3.5"></i>
+                        <span id="header-user-btn-text">Sign In / Switch Role</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ================================================================= -->
+    <!-- CONTEXT & PRIVACY STATUS BANNER                                   -->
+    <!-- ================================================================= -->
+    <div id="role-banner" class="bg-gradient-to-r from-[#EDE9FE] via-[#F5F3FF] to-white border-b border-[#DDD6FE] px-4 py-2">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs text-[#6B7280] gap-1.5">
+            <div class="flex items-center space-x-2">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-[#5B21B6] text-white shadow-xs" id="banner-role-badge">Resident Portal</span>
+                <span id="banner-user-info">Logged in as <strong>Priya Sharma</strong> (North Ward - Sector 4)</span>
+            </div>
+            <div class="flex items-center space-x-4 text-[#6B7280]">
+                <span class="flex items-center text-[#5B21B6] font-medium"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-[#7C3AED] mr-1"></i> 250m Repeated-Issue Clustering Active</span>
+                <span class="flex items-center text-[#1E1B4B]"><i data-lucide="lock" class="w-3.5 h-3.5 text-[#5B21B6] mr-1"></i> Resident Privacy Safeguards Enforced</span>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <!-- ================================================================= -->
+    <!-- MAIN APPLICATION CONTAINER                                        -->
+    <!-- ================================================================= -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- ============================================================= -->
+        <!-- 0. LANDING PAGE OVERVIEW                                       -->
+        <!-- ============================================================= -->
+        <section id="view-landing" class="role-view space-y-10 hidden">
+            <!-- Hero Section -->
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#F5F3FF] via-white to-[#EDE9FE]/50 border border-[#DDD6FE] p-8 sm:p-12 lg:p-16 shadow-md">
+                <div class="relative z-10 max-w-3xl space-y-5">
+                    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#EDE9FE] border border-[#DDD6FE] text-[#5B21B6] text-xs font-bold uppercase tracking-wider">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                        <span>Next-Generation Civic Utility Platform</span>
+                    </div>
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#1E1B4B] tracking-tight font-serif-royal leading-tight">
+                        Clean Water,<br>
+                        <span class="bg-gradient-to-r from-[#5B21B6] via-[#7C3AED] to-[#A78BFA] bg-clip-text text-transparent">Stronger Communities</span>
+                    </h1>
+                    <p class="text-base sm:text-lg text-[#6B7280] leading-relaxed">
+                        NIVORA modernizes municipal water management through automated 250m repeated-issue clustering, privacy-preserving field operations, and real-time GIS infrastructure health tracking.
+                    </p>
+                    <div class="flex flex-wrap items-center gap-3 pt-2">
+                        <button onclick="switchRole('resident')" class="btn-royal-primary px-6 py-3 text-sm flex items-center space-x-2">
+                            <i data-lucide="clipboard-pen" class="w-4 h-4"></i>
+                            <span>Report a Problem (Resident Portal)</span>
+                        </button>
+                        <button onclick="switchRole('admin')" class="btn-royal-secondary px-6 py-3 text-sm flex items-center space-x-2">
+                            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                            <span>Municipal Command Console</span>
+                        </button>
+                        <button onclick="switchRole('technician')" class="btn-royal-secondary px-6 py-3 text-sm flex items-center space-x-2">
+                            <i data-lucide="wrench" class="w-4 h-4"></i>
+                            <span>Service Team Mobile</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Decorative Background Drop Art -->
+                <div class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 opacity-15 pointer-events-none hidden lg:block">
+                    <div class="w-96 h-96 rounded-full bg-gradient-to-tr from-[#5B21B6] to-[#A78BFA] blur-3xl"></div>
+                </div>
+            </div>
+
+            <!-- Key Metric Counters Strip -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="royal-card p-5 text-center">
+                    <span class="text-xs text-[#6B7280] font-medium">Municipal Distribution Wards</span>
+                    <div class="text-3xl font-extrabold text-[#1E1B4B] mt-1">15</div>
+                    <span class="text-[11px] text-[#7C3AED] font-semibold">Active Pipeline Grids</span>
+                </div>
+                <div class="royal-card p-5 text-center">
+                    <span class="text-xs text-[#6B7280] font-medium">Verified Citizen Complaints</span>
+                    <div class="text-3xl font-extrabold text-[#5B21B6] mt-1">10,000</div>
+                    <span class="text-[11px] text-[#6B7280]">Fully Audited Dataset</span>
+                </div>
+                <div class="royal-card p-5 text-center">
+                    <span class="text-xs text-[#6B7280] font-medium">SLA Resolution Target</span>
+                    <div class="text-3xl font-extrabold text-emerald-600 mt-1">98.4%</div>
+                    <span class="text-[11px] text-emerald-700 font-semibold">Within Guaranteed SLA</span>
+                </div>
+                <div class="royal-card p-5 text-center">
+                    <span class="text-xs text-[#6B7280] font-medium">Spatial Grouping Threshold</span>
+                    <div class="text-3xl font-extrabold text-[#7C3AED] mt-1">250m</div>
+                    <span class="text-[11px] text-[#5B21B6] font-semibold">Haversine / PostGIS Engine</span>
+                </div>
+            </div>
+
+            <!-- Core Architectural Capabilities (4 Feature Cards) -->
+            <div class="space-y-4">
+                <div class="text-center max-w-xl mx-auto space-y-1.5">
+                    <h2 class="text-2xl font-bold text-[#1E1B4B] font-serif-royal">Engineered for Municipal Excellence</h2>
+                    <p class="text-xs text-[#6B7280]">Key innovations powering seamless water utility management</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <!-- Feature 1 -->
+                    <div class="royal-card p-6 space-y-3">
+                        <div class="w-12 h-12 rounded-xl bg-[#EDE9FE] text-[#5B21B6] flex items-center justify-center">
+                            <i data-lucide="layers" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-sm font-bold text-[#1E1B4B]">Proactive Incident Clustering</h3>
+                        <p class="text-xs text-[#6B7280] leading-relaxed">
+                            Detects complaints within a 250m radius and 48-hour window, automatically combining neighbor reports into Master Incident Clusters to eliminate duplicate field dispatches.
+                        </p>
+                    </div>
+
+                    <!-- Feature 2 -->
+                    <div class="royal-card p-6 space-y-3">
+                        <div class="w-12 h-12 rounded-xl bg-[#EDE9FE] text-[#5B21B6] flex items-center justify-center">
+                            <i data-lucide="shield-check" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-sm font-bold text-[#1E1B4B]">Citizen Privacy Guard</h3>
+                        <p class="text-xs text-[#6B7280] leading-relaxed">
+                            Masks resident phone numbers and exact flat IDs from contractor view while supplying verified street landmarks and precise junction coordinates for repair navigation.
+                        </p>
+                    </div>
+
+                    <!-- Feature 3 -->
+                    <div class="royal-card p-6 space-y-3">
+                        <div class="w-12 h-12 rounded-xl bg-[#EDE9FE] text-[#5B21B6] flex items-center justify-center">
+                            <i data-lucide="map" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-sm font-bold text-[#1E1B4B]">GIS Infrastructure Health</h3>
+                        <p class="text-xs text-[#6B7280] leading-relaxed">
+                            Provides interactive Leaflet GIS proximity mapping and dynamic Ward Health Scores (0-100%) reflecting active pipe bursts, contamination alarms, and MTTR compliance.
+                        </p>
+                    </div>
+
+                    <!-- Feature 4 -->
+                    <div class="royal-card p-6 space-y-3">
+                        <div class="w-12 h-12 rounded-xl bg-[#EDE9FE] text-[#5B21B6] flex items-center justify-center">
+                            <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-sm font-bold text-[#1E1B4B]">Verified Field Resolutions</h3>
+                        <p class="text-xs text-[#6B7280] leading-relaxed">
+                            Enforces structured work-order lifecycles with on-site check-in, photographic repair proof submission, supervisor escalation paths, and citizen 5-star ratings.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role Access Callout Banners -->
+            <div class="royal-card p-6 bg-gradient-to-r from-[#EDE9FE] via-white to-[#F5F3FF] border border-[#DDD6FE]">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <h3 class="text-base font-bold text-[#1E1B4B]">Ready to explore Nivora's workflows?</h3>
+                        <p class="text-xs text-[#6B7280]">Select a role above or click below to launch the interactive Resident complaint registration wizard.</p>
+                    </div>
+                    <button onclick="switchRole('resident')" class="btn-royal-primary px-5 py-2.5 text-xs flex items-center space-x-2 flex-shrink-0">
+                        <span>Open Resident Portal</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- 1. RESIDENT PORTAL                                            -->
+        <!-- ============================================================= -->
+        <section id="view-resident" class="role-view space-y-6">
+            
+            <!-- Proactive Nearby Cluster Alert (One-Tap Confirmation) -->
+            <div id="resident-nearby-cluster-card" class="bg-gradient-to-r from-[#EDE9FE] via-[#F5F3FF] to-white border border-[#DDD6FE] rounded-2xl p-5 shadow-sm">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div class="flex items-start space-x-3.5">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#5B21B6] to-[#7C3AED] text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-purple-500/20">
+                            <i data-lucide="network" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <h3 class="text-sm font-bold text-[#1E1B4B]">Active Recurring Issue Detected in Your Area</h3>
+                                <span class="bg-[#EDE9FE] text-[#5B21B6] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[#DDD6FE]">Cluster Alert</span>
+                            </div>
+                            <p class="text-xs text-[#6B7280] mt-1">
+                                <strong>3 neighbor reports</strong> within 200m match a shared <strong>Pipeline Leak / Burst</strong> at incident code <span class="font-mono font-semibold underline text-[#5B21B6]">CLS-NW-2026-081</span>. A service team has already been dispatched.
+                            </p>
+                        </div>
+                    </div>
+                    <button onclick="quickLinkToCluster(1)" class="w-full sm:w-auto px-4 py-2.5 btn-royal-primary text-xs flex items-center justify-center space-x-2">
+                        <i data-lucide="check-check" class="w-4 h-4"></i>
+                        <span>I Have This Issue Too (1-Tap Confirmation)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Two-Column Layout: 3-Step Wizard Form & Tracked Complaints -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Left: 3-Step Complaint Registration Wizard -->
+                <div class="lg:col-span-5 royal-card p-6 flex flex-col">
+                    
+                    <!-- Wizard Header & Progress Indicators -->
+                    <div class="border-b border-[#DDD6FE] pb-4 mb-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-base font-bold text-[#1E1B4B]">Report a Water Problem</h2>
+                            <i data-lucide="clipboard-pen" class="w-5 h-5 text-[#7C3AED]"></i>
+                        </div>
+
+                        <!-- 3-Step Progress Indicators Bar -->
+                        <div class="step-indicator">
+                            <div class="flex flex-col items-center">
+                                <div id="step-dot-1" class="step-circle active">1</div>
+                                <span class="text-[10px] font-semibold text-[#5B21B6] mt-1">Category</span>
+                            </div>
+                            <div id="step-line-1" class="step-line"></div>
+                            <div class="flex flex-col items-center">
+                                <div id="step-dot-2" class="step-circle pending">2</div>
+                                <span class="text-[10px] font-semibold text-[#6B7280] mt-1">Location</span>
+                            </div>
+                            <div id="step-line-2" class="step-line"></div>
+                            <div class="flex flex-col items-center">
+                                <div id="step-dot-3" class="step-circle pending">3</div>
+                                <span class="text-[10px] font-semibold text-[#6B7280] mt-1">Submit</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- The 3-Step Form Form Container -->
+                    <form id="complaint-form" onsubmit="handleComplaintSubmit(event)" class="space-y-4 flex-grow flex flex-col justify-between">
+                        
+                        <!-- ================= STEP 1: ISSUE CATEGORY ================= -->
+                        <div id="wizard-step-1" class="wizard-step space-y-3">
+                            <label class="block text-xs font-bold text-[#1E1B4B]">Step 1: Select the problem you are experiencing <span class="text-rose-500">*</span></label>
+                            <p class="text-[11px] text-[#6B7280]">Select the category that best describes your water supply issue:</p>
+                            
+                            <div class="grid grid-cols-1 gap-2" id="category-selector-container">
+                                <!-- Populated dynamically by JS -->
+                            </div>
+                            <input type="hidden" id="selected-category-id" value="1">
+
+                            <div class="pt-4 flex justify-end">
+                                <button type="button" onclick="goToWizardStep(2)" class="btn-royal-primary px-4 py-2 text-xs flex items-center space-x-1.5">
+                                    <span>Next: Location & Time</span>
+                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ================= STEP 2: LOCALITY & INCIDENT TIME ================= -->
+                        <div id="wizard-step-2" class="wizard-step space-y-4 hidden">
+                            <label class="block text-xs font-bold text-[#1E1B4B]">Step 2: Locality and When Issue Occurred <span class="text-rose-500">*</span></label>
+                            
+                            <!-- Locality Selection -->
+                            <div>
+                                <label for="resident-locality-select" class="block text-xs font-semibold text-[#1E1B4B] mb-1">Administrative Locality / Ward <span class="text-rose-500">*</span></label>
+                                <select id="resident-locality-select" required class="w-full text-xs p-2.5 bg-white border border-[#DDD6FE] rounded-xl focus:ring-2 focus:ring-[#7C3AED]">
+                                    <!-- Populated dynamically -->
+                                </select>
+                            </div>
+
+                            <!-- Incident Occurrence Time -->
+                            <div>
+                                <label for="complaint-incident-time" class="block text-xs font-semibold text-[#1E1B4B] mb-1">When did you first notice this issue? <span class="text-rose-500">*</span></label>
+                                <input type="datetime-local" id="complaint-incident-time" required class="w-full text-xs p-2.5 bg-white border border-[#DDD6FE] rounded-xl focus:ring-2 focus:ring-[#7C3AED]">
+                                <p class="text-[10px] text-[#6B7280] mt-1">Records the observation timestamp separately from submission time.</p>
+                            </div>
+
+                            <div class="pt-4 flex items-center justify-between">
+                                <button type="button" onclick="goToWizardStep(1)" class="btn-royal-secondary px-4 py-2 text-xs flex items-center space-x-1">
+                                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                                    <span>Back</span>
+                                </button>
+                                <button type="button" onclick="goToWizardStep(3)" class="btn-royal-primary px-4 py-2 text-xs flex items-center space-x-1.5">
+                                    <span>Next: Details & GPS</span>
+                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ================= STEP 3: DETAILS & SUBMISSION ================= -->
+                        <div id="wizard-step-3" class="wizard-step space-y-3 hidden">
+                            <label class="block text-xs font-bold text-[#1E1B4B]">Step 3: Landmark, Premises & Submission <span class="text-rose-500">*</span></label>
+
+                            <!-- Landmark & Premises -->
+                            <div>
+                                <label for="complaint-landmark" class="block text-xs font-semibold text-[#1E1B4B] mb-1">Street Landmark (Visible to Service Team) <span class="text-rose-500">*</span></label>
+                                <input type="text" id="complaint-landmark" required placeholder="e.g. Opposite Metro Pillar 42, Near Park Gate" class="w-full text-xs p-2.5 bg-white border border-[#DDD6FE] rounded-xl">
+                            </div>
+
+                            <div>
+                                <label for="complaint-house" class="block text-xs font-semibold text-[#1E1B4B] mb-1">House / Flat Number <span class="text-[#6B7280] font-normal">(Protected by Privacy Guard)</span></label>
+                                <input type="text" id="complaint-house" placeholder="e.g. Flat 302, Block B" class="w-full text-xs p-2.5 bg-white border border-[#DDD6FE] rounded-xl">
+                            </div>
+
+                            <!-- Coordinates & GPS Auto-Fetch -->
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <label class="text-xs font-semibold text-[#1E1B4B]">Coordinates</label>
+                                    <button type="button" onclick="autoDetectCoordinates()" class="text-[11px] text-[#7C3AED] font-semibold hover:underline flex items-center">
+                                        <i data-lucide="crosshair" class="w-3.5 h-3.5 mr-1"></i> Auto-fetch GPS Pin
+                                    </button>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="number" step="0.0001" id="complaint-lat" value="28.6283" class="w-full text-xs p-2 bg-[#F5F3FF] border border-[#DDD6FE] rounded-xl font-mono" placeholder="Latitude">
+                                    <input type="number" step="0.0001" id="complaint-lng" value="77.2085" class="w-full text-xs p-2 bg-[#F5F3FF] border border-[#DDD6FE] rounded-xl font-mono" placeholder="Longitude">
+                                </div>
+                            </div>
+
+                            <!-- Optional Description -->
+                            <div>
+                                <label for="complaint-desc" class="block text-xs font-semibold text-[#1E1B4B] mb-1">Observations <span class="text-[#6B7280] font-normal">(Optional)</span></label>
+                                <textarea id="complaint-desc" rows="2" placeholder="Describe water pressure drop, discoloration, odor, or street flooding..." class="w-full text-xs p-2 bg-white border border-[#DDD6FE] rounded-xl"></textarea>
+                            </div>
+
+                            <!-- Privacy Guard Checkbox -->
+                            <div class="bg-[#EDE9FE]/60 border border-[#DDD6FE] rounded-xl p-3 flex items-start space-x-2.5">
+                                <input type="checkbox" id="privacy-opt-in" checked class="mt-0.5 rounded text-[#7C3AED] focus:ring-[#7C3AED]">
+                                <label for="privacy-opt-in" class="text-[11px] text-[#1E1B4B] leading-tight">
+                                    <strong>Privacy Guard Active</strong>: Your telephone number and flat ID will be automatically masked from contractor view. Technicians navigate via landmark.
+                                </label>
+                            </div>
+
+                            <!-- Navigation & Submit -->
+                            <div class="pt-3 flex items-center justify-between">
+                                <button type="button" onclick="goToWizardStep(2)" class="btn-royal-secondary px-4 py-2 text-xs flex items-center space-x-1">
+                                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                                    <span>Back</span>
+                                </button>
+                                <button type="submit" id="btn-submit-complaint" class="btn-royal-primary px-5 py-2.5 text-xs flex items-center space-x-2">
+                                    <i data-lucide="send" class="w-4 h-4"></i>
+                                    <span>Submit Complaint & Generate Reference</span>
+                                </button>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+
+                <!-- Right: My Tracked Complaints & Vertical Timeline -->
+                <div class="lg:col-span-7 royal-card p-6 flex flex-col">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-[#DDD6FE] pb-3 mb-4 gap-2">
+                        <div>
+                            <h2 class="text-base font-bold text-[#1E1B4B]">My Water Complaints & Timeline</h2>
+                            <p class="text-xs text-[#6B7280]">Track real-time status progression and confirm resolutions</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <select id="resident-filter-status" onchange="renderResidentTickets()" class="text-xs border border-[#DDD6FE] rounded-lg px-2.5 py-1.5 bg-[#F5F3FF] focus:outline-none">
+                                <option value="all">All Statuses</option>
+                                <option value="active">Active / In Progress</option>
+                                <option value="resolved">Resolved (Needs Confirmation)</option>
+                                <option value="closed">Closed / Confirmed</option>
+                            </select>
+                            <button onclick="loadComplaints()" class="p-1.5 text-[#5B21B6] hover:bg-[#EDE9FE] border border-[#DDD6FE] rounded-lg transition" title="Refresh complaints">
+                                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="resident-tickets-list" class="space-y-4 flex-grow overflow-y-auto max-h-[660px] pr-1">
+                        <!-- Populated dynamically by JS -->
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- 2. ADMINISTRATOR PORTAL                                        -->
+        <!-- ============================================================= -->
+        <section id="view-admin" class="role-view space-y-6 hidden">
+            
+            <!-- Executive KPI Cards -->
+            <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                <div class="royal-card p-4">
+                    <span class="text-xs text-[#6B7280] font-medium">Total Complaints</span>
+                    <div class="text-2xl font-extrabold text-[#1E1B4B] mt-1" id="kpi-total-tickets">--</div>
+                    <span class="text-[11px] text-[#6B7280]">All 15 wards combined</span>
+                </div>
+                <div class="royal-card p-4 bg-[#EDE9FE]/40 border-[#A78BFA]/50">
+                    <span class="text-xs text-[#5B21B6] font-bold flex items-center">
+                        <i data-lucide="layers" class="w-3.5 h-3.5 mr-1 text-[#7C3AED]"></i> Recurring Clusters
+                    </span>
+                    <div class="text-2xl font-extrabold text-[#1E1B4B] mt-1" id="kpi-active-clusters">--</div>
+                    <span class="text-[11px] text-[#5B21B6]">Repeated-issue grouping</span>
+                </div>
+                <div class="royal-card p-4">
+                    <span class="text-xs text-[#6B7280] font-medium">SLA Compliance</span>
+                    <div class="text-2xl font-extrabold text-emerald-600 mt-1" id="kpi-sla-rate">--%</div>
+                    <span class="text-[11px] text-emerald-700 font-medium">Target &gt;90%</span>
+                </div>
+                <div class="royal-card p-4">
+                    <span class="text-xs text-[#6B7280] font-medium">Mean Time to Resolve</span>
+                    <div class="text-2xl font-extrabold text-[#5B21B6] mt-1" id="kpi-mttr">-- hrs</div>
+                    <span class="text-[11px] text-[#6B7280]">Target &lt;6 hrs</span>
+                </div>
+                <div class="royal-card p-4">
+                    <span class="text-xs text-[#6B7280] font-medium">Citizen Satisfaction</span>
+                    <div class="text-2xl font-extrabold text-amber-500 mt-1" id="kpi-rating">⭐ --</div>
+                    <span class="text-[11px] text-[#6B7280]" id="kpi-reviews">Verified feedback</span>
+                </div>
+            </div>
+
+            <!-- Recurring Issue Alerts & Master Clusters Inspection Bar -->
+            <div class="royal-card p-5 space-y-3">
+                <div class="flex items-center justify-between border-b border-[#DDD6FE] pb-3">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-7 h-7 rounded-lg bg-[#EDE9FE] text-[#5B21B6] flex items-center justify-center font-bold">
+                            <i data-lucide="network" class="w-4 h-4"></i>
+                        </span>
+                        <div>
+                            <h3 class="text-sm font-bold text-[#1E1B4B]">Active Recurring Issue Alerts & Incident Groupings</h3>
+                            <p class="text-xs text-[#6B7280]">Auto-clustered complaints originating within 250m radius inside 48 hours</p>
+                        </div>
+                    </div>
+                    <span class="text-xs font-semibold px-2.5 py-1 bg-[#EDE9FE] text-[#5B21B6] rounded-full border border-[#DDD6FE]" id="admin-cluster-badge">1 Active Cluster</span>
+                </div>
+
+                <div id="admin-clusters-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Filter & Search Toolbar + Export Reports -->
+            <div class="royal-card p-5 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-[#DDD6FE] pb-3">
+                    <div>
+                        <h3 class="text-base font-bold text-[#1E1B4B]">Complaints & Work Order Management</h3>
+                        <p class="text-xs text-[#6B7280]">Filter, inspect locality trends, assign service teams, and export audit reports</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="exportComplaintsCSV()" class="btn-royal-primary px-3.5 py-2 text-xs flex items-center space-x-1.5">
+                            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                            <span>Export CSV</span>
+                        </button>
+                        <button onclick="exportReportPDF()" class="btn-royal-secondary px-3.5 py-2 text-xs flex items-center space-x-1.5">
+                            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                            <span>Print / PDF</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Rich Filter Controls -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 text-xs">
+                    <div>
+                        <label class="block font-semibold text-[#1E1B4B] mb-1">Search Reference / Landmark</label>
+                        <div class="relative">
+                            <i data-lucide="search" class="w-3.5 h-3.5 text-[#6B7280] absolute left-2.5 top-2.5"></i>
+                            <input type="text" id="admin-filter-search" oninput="applyAdminFilters()" placeholder="TKT- or street..." class="w-full pl-8 pr-3 py-1.5 rounded-lg border border-[#DDD6FE] bg-white">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-[#1E1B4B] mb-1">Locality / Ward</label>
+                        <select id="admin-filter-locality" onchange="applyAdminFilters()" class="w-full py-1.5 px-2.5 rounded-lg border border-[#DDD6FE] bg-[#F5F3FF]">
+                            <option value="all">All Localities</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-[#1E1B4B] mb-1">Category</label>
+                        <select id="admin-filter-category" onchange="applyAdminFilters()" class="w-full py-1.5 px-2.5 rounded-lg border border-[#DDD6FE] bg-[#F5F3FF]">
+                            <option value="all">All Categories</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-[#1E1B4B] mb-1">Status</label>
+                        <select id="admin-filter-status" onchange="applyAdminFilters()" class="w-full py-1.5 px-2.5 rounded-lg border border-[#DDD6FE] bg-[#F5F3FF]">
+                            <option value="all">All Statuses</option>
+                            <option value="submitted">Submitted</option>
+                            <option value="clustered">Clustered</option>
+                            <option value="assigned">Assigned</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="resolved">Resolved</option>
+                            <option value="closed">Closed / Confirmed</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="resetAdminFilters()" class="w-full py-1.5 px-3 bg-[#EDE9FE] hover:bg-[#DDD6FE] text-[#5B21B6] font-semibold rounded-lg transition text-xs flex items-center justify-center space-x-1">
+                            <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                            <span>Reset Filters</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Complaints Table -->
+                <div class="overflow-x-auto border border-[#DDD6FE] rounded-xl">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-[#F5F3FF] text-[#5B21B6] uppercase text-[10px] tracking-wider border-b border-[#DDD6FE]">
+                            <tr>
+                                <th class="py-2.5 px-3">Reference #</th>
+                                <th class="py-2.5 px-3">Locality</th>
+                                <th class="py-2.5 px-3">Category</th>
+                                <th class="py-2.5 px-3">Observed Time</th>
+                                <th class="py-2.5 px-3">Priority</th>
+                                <th class="py-2.5 px-3">Status</th>
+                                <th class="py-2.5 px-3">Assigned Service Team</th>
+                                <th class="py-2.5 px-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-complaints-tbody" class="divide-y divide-[#DDD6FE]">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- GIS Interactive Locality Map -->
+            <div class="royal-card p-5 space-y-3">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-[#DDD6FE] pb-3 gap-2">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <h3 class="text-base font-bold text-[#1E1B4B]">Locality GIS Incident Proximity Map</h3>
+                            <span class="px-2 py-0.5 bg-[#EDE9FE] text-[#5B21B6] rounded text-[11px] font-semibold border border-[#DDD6FE]">PostGIS / Haversine Layer</span>
+                        </div>
+                        <p class="text-xs text-[#6B7280]">Purple dotted circles illustrate 250m incident clustering radiuses. Pins denote active infrastructure incidents.</p>
+                    </div>
+                    <!-- Legend -->
+                    <div class="flex flex-wrap items-center gap-3 text-xs">
+                        <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-red-500 mr-1.5"></span> Pipe Leak / Burst</span>
+                        <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-amber-500 mr-1.5"></span> Contamination</span>
+                        <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-sky-500 mr-1.5"></span> Low Pressure</span>
+                        <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-emerald-500 mr-1.5"></span> Resolved / Closed</span>
+                        <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-[#7C3AED] mr-1.5"></span> 250m Proximity Circle</span>
+                    </div>
+                </div>
+
+                <div id="gis-map"></div>
+            </div>
+
+            <!-- Locality Trends & Infrastructure Health Table -->
+            <div class="royal-card p-5 space-y-3">
+                <div class="border-b border-[#DDD6FE] pb-3 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-base font-bold text-[#1E1B4B]">Ward Infrastructure Health & Locality Trends</h3>
+                        <p class="text-xs text-[#6B7280]">Aggregated municipal breakdown by trunk line distribution grid</p>
+                    </div>
+                    <span class="text-xs text-[#6B7280] bg-[#EDE9FE] px-2 py-0.5 rounded-full border border-[#DDD6FE]">15 Active Wards</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-[#F5F3FF] text-[#5B21B6] uppercase text-[10px] tracking-wider border-y border-[#DDD6FE]">
+                            <tr>
+                                <th class="py-2.5 px-3">Ward / Locality</th>
+                                <th class="py-2.5 px-3">Pipeline Grid</th>
+                                <th class="py-2.5 px-3">Complaints</th>
+                                <th class="py-2.5 px-3">Burst / Leaks</th>
+                                <th class="py-2.5 px-3">Contamination</th>
+                                <th class="py-2.5 px-3">Health Score</th>
+                                <th class="py-2.5 px-3">Status</th>
+                                <th class="py-2.5 px-3">Ward Supervisor</th>
+                            </tr>
+                        </thead>
+                        <tbody id="locality-analytics-tbody" class="divide-y divide-[#DDD6FE]">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Performance Reports & Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-5 royal-card p-5">
+                    <h3 class="text-sm font-bold text-[#1E1B4B] mb-0.5">Problem Distribution by Category</h3>
+                    <p class="text-xs text-[#6B7280] mb-3">Breakdown of reported issues</p>
+                    <div class="h-60 flex items-center justify-center">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-7 royal-card p-5">
+                    <h3 class="text-sm font-bold text-[#1E1B4B] mb-0.5">Service Team Resolution Leaderboard</h3>
+                    <p class="text-xs text-[#6B7280] mb-3">Field crew jobs completed and resident satisfaction ratings</p>
+                    <div id="technician-leaderboard-container" class="space-y-2.5">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Audit Logs Trail -->
+            <div class="royal-card p-5 space-y-2">
+                <div class="flex items-center justify-between border-b border-[#DDD6FE] pb-2">
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-[#5B21B6]"></i>
+                        <h3 class="text-xs font-bold text-[#1E1B4B] uppercase tracking-wider">System Operations & Dispatch Audit Trail</h3>
+                    </div>
+                    <span class="text-[11px] text-[#6B7280]">Tamper-Evident Security Log</span>
+                </div>
+                <div id="audit-logs-list" class="space-y-1.5 text-xs text-[#1E1B4B] max-h-40 overflow-y-auto font-mono">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- 3. SERVICE-TEAM PORTAL                                        -->
+        <!-- ============================================================= -->
+        <section id="view-technician" class="role-view space-y-6 hidden">
+            
+            <!-- Technician Profile Banner -->
+            <div class="bg-gradient-to-r from-[#1E1B4B] via-[#4C1D95] to-[#5B21B6] text-white rounded-2xl p-6 shadow-lg flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-[#7C3AED] to-[#A78BFA] flex items-center justify-center text-white font-bold text-lg shadow-md ring-2 ring-purple-300">
+                        <i data-lucide="hard-hat" class="w-7 h-7"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <h2 class="text-lg font-bold">Rajesh Kumar</h2>
+                            <span class="bg-[#EDE9FE]/20 text-[#DDD6FE] text-xs px-2.5 py-0.5 rounded-full border border-[#DDD6FE]/30 font-medium">Field Specialist</span>
+                        </div>
+                        <p class="text-xs text-[#DDD6FE] mt-0.5">Assigned Locality: North Ward (Grid Alpha-North) • Mobile Service Unit #3</p>
+                    </div>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-2.5 rounded-xl flex items-center space-x-2 text-xs text-purple-100">
+                    <i data-lucide="lock" class="w-4 h-4 text-[#A78BFA]"></i>
+                    <span><strong>Privacy Compliance Active</strong>: Resident personal IDs masked. Landmark coordinates provided.</span>
+                </div>
+            </div>
+
+            <!-- Priority & Status Filters -->
+            <div class="royal-card p-5 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-[#DDD6FE] pb-3">
+                    <div>
+                        <h3 class="text-base font-bold text-[#1E1B4B]">Assigned Field Work Orders</h3>
+                        <p class="text-xs text-[#6B7280]">Review incident details, record progress notes, and escalate overdue work</p>
+                    </div>
+                    <span id="tech-job-count" class="text-xs font-semibold bg-[#EDE9FE] text-[#5B21B6] px-2.5 py-1 rounded-full border border-[#DDD6FE]">3 Orders in Queue</span>
+                </div>
+
+                <!-- Technician Filters -->
+                <div class="flex flex-wrap items-center gap-2 text-xs">
+                    <span class="text-[#6B7280] font-semibold mr-1">Priority:</span>
+                    <button onclick="filterTechJobs('priority', 'all')" class="tech-filter-prio px-3 py-1 rounded-lg bg-[#5B21B6] text-white font-medium">All</button>
+                    <button onclick="filterTechJobs('priority', 'critical')" class="tech-filter-prio px-3 py-1 rounded-lg bg-[#F5F3FF] text-[#1E1B4B] hover:bg-[#EDE9FE]">Critical</button>
+                    <button onclick="filterTechJobs('priority', 'high')" class="tech-filter-prio px-3 py-1 rounded-lg bg-[#F5F3FF] text-[#1E1B4B] hover:bg-[#EDE9FE]">High</button>
+                    <button onclick="filterTechJobs('priority', 'medium')" class="tech-filter-prio px-3 py-1 rounded-lg bg-[#F5F3FF] text-[#1E1B4B] hover:bg-[#EDE9FE]">Medium</button>
+
+                    <span class="text-[#DDD6FE] mx-2">|</span>
+
+                    <span class="text-[#6B7280] font-semibold mr-1">Status:</span>
+                    <button onclick="filterTechJobs('status', 'all')" class="tech-filter-stat px-3 py-1 rounded-lg bg-[#5B21B6] text-white font-medium">All</button>
+                    <button onclick="filterTechJobs('status', 'pending')" class="tech-filter-stat px-3 py-1 rounded-lg bg-[#F5F3FF] text-[#1E1B4B] hover:bg-[#EDE9FE]">Pending</button>
+                    <button onclick="filterTechJobs('status', 'in_progress')" class="tech-filter-stat px-3 py-1 rounded-lg bg-[#F5F3FF] text-[#1E1B4B] hover:bg-[#EDE9FE]">In Progress</button>
+                    <button onclick="filterTechJobs('status', 'resolved')" class="tech-filter-stat px-3 py-1 rounded-lg bg-[#F5F3FF] text-[#1E1B4B] hover:bg-[#EDE9FE]">Completed</button>
+                </div>
+
+                <!-- Orders Container -->
+                <div id="technician-jobs-list" class="space-y-4 pt-1">
+                    <!-- Populated dynamically by JS -->
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- 4. REPORTS & ANALYTICS PORTAL                                 -->
+        <!-- ============================================================= -->
+        <section id="view-reports" class="role-view space-y-6 hidden">
+            <div class="royal-card p-6 space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-[#DDD6FE] pb-4 gap-3">
+                    <div>
+                        <h2 class="text-xl font-bold text-[#1E1B4B] font-serif-royal">Municipal Performance & SLA Reports</h2>
+                        <p class="text-xs text-[#6B7280]">Official municipal compliance, MTTR analytics, and audit extracts</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="exportComplaintsCSV()" class="btn-royal-primary px-4 py-2 text-xs flex items-center space-x-1.5">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                            <span>Export Full CSV Dataset</span>
+                        </button>
+                        <button onclick="exportReportPDF()" class="btn-royal-secondary px-4 py-2 text-xs flex items-center space-x-1.5">
+                            <i data-lucide="file-text" class="w-4 h-4"></i>
+                            <span>Print Official PDF Summary</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Executive Summary Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="p-4 rounded-xl bg-[#EDE9FE]/50 border border-[#DDD6FE]">
+                        <span class="text-xs text-[#5B21B6] font-semibold">Citywide SLA Adherence</span>
+                        <div class="text-2xl font-extrabold text-[#1E1B4B] mt-1" id="report-sla-metric">98.4%</div>
+                        <p class="text-[11px] text-[#6B7280] mt-0.5">Complaints resolved within statutory hours</p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-[#EDE9FE]/50 border border-[#DDD6FE]">
+                        <span class="text-xs text-[#5B21B6] font-semibold">Mean Time to Resolve (MTTR)</span>
+                        <div class="text-2xl font-extrabold text-[#1E1B4B] mt-1" id="report-mttr-metric">4.2 hrs</div>
+                        <p class="text-[11px] text-[#6B7280] mt-0.5">Average dispatch to citizen sign-off</p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-[#EDE9FE]/50 border border-[#DDD6FE]">
+                        <span class="text-xs text-[#5B21B6] font-semibold">Geospatial Clustering Efficiency</span>
+                        <div class="text-2xl font-extrabold text-[#7C3AED] mt-1">56.8%</div>
+                        <p class="text-[11px] text-[#6B7280] mt-0.5">Duplicate dispatches eliminated via 250m grouping</p>
+                    </div>
+                </div>
+
+                <!-- Detailed Locality Breakdown Table for Reporting -->
+                <div class="space-y-3">
+                    <h3 class="text-sm font-bold text-[#1E1B4B]">Locality SLA Compliance Breakdown (15 Administrative Wards)</h3>
+                    <div class="overflow-x-auto border border-[#DDD6FE] rounded-xl">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-[#F5F3FF] text-[#5B21B6] uppercase text-[10px] tracking-wider border-b border-[#DDD6FE]">
+                                <tr>
+                                    <th class="py-2.5 px-3">Ward Code</th>
+                                    <th class="py-2.5 px-3">Locality Name</th>
+                                    <th class="py-2.5 px-3">Distribution Grid</th>
+                                    <th class="py-2.5 px-3">Total Complaints</th>
+                                    <th class="py-2.5 px-3">Health Score</th>
+                                    <th class="py-2.5 px-3">SLA Status</th>
+                                    <th class="py-2.5 px-3">Supervisor In-Charge</th>
+                                </tr>
+                            </thead>
+                            <tbody id="report-table-tbody" class="divide-y divide-[#DDD6FE]">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ============================================================= -->
+    <!-- MODALS & TOAST NOTIFICATIONS                                  -->
+    <!-- ============================================================= -->
+
+    <!-- Modal 0: Authentication & Role Switcher -->
+    <div id="auth-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="royal-card max-w-md w-full p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-[#DDD6FE] pb-3">
+                <div class="flex items-center space-x-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#5B21B6] to-[#7C3AED] text-white flex items-center justify-center">
+                        <i data-lucide="key-round" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-[#1E1B4B]">Nivora Identity & Role Access</h3>
+                        <p class="text-[11px] text-[#6B7280]">Select a role or sign in with credentials</p>
+                    </div>
+                </div>
+                <button onclick="closeAuthModal()" class="text-[#6B7280] hover:text-[#1E1B4B]"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+
+            <!-- Role Quick Switcher Presets -->
+            <div class="space-y-2">
+                <span class="text-xs font-semibold text-[#1E1B4B]">Instant Demo Sign-In:</span>
+                
+                <button onclick="signInWithRole('resident')" class="w-full p-3 rounded-xl border border-[#DDD6FE] bg-[#F5F3FF] hover:bg-[#EDE9FE] transition text-left flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-lg bg-[#5B21B6] text-white flex items-center justify-center font-bold text-xs">RS</div>
+                        <div>
+                            <div class="text-xs font-bold text-[#1E1B4B]">Priya Sharma (Resident Citizen)</div>
+                            <div class="text-[10px] text-[#6B7280]">North Ward - Sector 4 • Privacy Safeguards Enabled</div>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-[#7C3AED]"></i>
+                </button>
+
+                <button onclick="signInWithRole('admin')" class="w-full p-3 rounded-xl border border-[#DDD6FE] bg-[#F5F3FF] hover:bg-[#EDE9FE] transition text-left flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-lg bg-[#1E1B4B] text-white flex items-center justify-center font-bold text-xs">AD</div>
+                        <div>
+                            <div class="text-xs font-bold text-[#1E1B4B]">City Water Commissioner (Administrator)</div>
+                            <div class="text-[10px] text-[#6B7280]">Central Command • GIS Locality Analytics</div>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-[#7C3AED]"></i>
+                </button>
+
+                <button onclick="signInWithRole('technician')" class="w-full p-3 rounded-xl border border-[#DDD6FE] bg-[#F5F3FF] hover:bg-[#EDE9FE] transition text-left flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-lg bg-[#7C3AED] text-white flex items-center justify-center font-bold text-xs">TC</div>
+                        <div>
+                            <div class="text-xs font-bold text-[#1E1B4B]">Rajesh Kumar (Field Specialist)</div>
+                            <div class="text-[10px] text-[#6B7280]">Service Crew #3 • Work Orders & Landmark Nav</div>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-[#7C3AED]"></i>
+                </button>
+            </div>
+
+            <div class="border-t border-[#DDD6FE] pt-3 text-center">
+                <button onclick="closeAuthModal()" class="text-xs font-semibold text-[#5B21B6] hover:underline">
+                    Continue with Current Session
+                </button>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <!-- Modal 1: Complaint Submission Success with Reference Number -->
+    <div id="success-reference-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="royal-card max-w-md w-full p-6 space-y-4">
+            <div class="text-center space-y-2">
+                <div class="w-12 h-12 rounded-full bg-[#EDE9FE] text-[#5B21B6] flex items-center justify-center mx-auto border border-[#DDD6FE]">
+                    <i data-lucide="check-circle-2" class="w-7 h-7"></i>
+                </div>
+                <h3 class="text-base font-bold text-[#1E1B4B]">Complaint Registered Successfully</h3>
+                <p class="text-xs text-[#6B7280]">Your water supply report has been received and logged into the dispatch queue.</p>
+            </div>
+
+            <!-- Reference Number Highlight Box -->
+            <div class="bg-[#F5F3FF] border border-[#DDD6FE] rounded-xl p-4 text-center space-y-2">
+                <span class="text-[11px] font-semibold text-[#6B7280] uppercase tracking-wider">Complaint Reference Number</span>
+                <div class="text-xl font-extrabold font-mono text-[#5B21B6] flex items-center justify-center space-x-2">
+                    <span id="modal-ref-number">TKT-2026-00000</span>
+                    <button onclick="copyReferenceNumber()" class="p-1 hover:text-[#7C3AED] transition" title="Copy Reference Number">
+                        <i data-lucide="copy" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <p class="text-[11px] text-[#5B21B6]" id="modal-cluster-notice">Standard Category SLA: Within 6 hours</p>
+            </div>
+
+            <div class="pt-2">
+                <button onclick="closeSuccessModal()" class="w-full py-2.5 btn-royal-primary text-xs">
+                    View in My Tracked Complaints
+                </button>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <!-- Modal 2: Inspect Recurring Incident Cluster Grouping -->
+    <div id="cluster-inspect-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="royal-card max-w-xl w-full p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-[#DDD6FE] pb-3">
+                <div class="flex items-center space-x-2">
+                    <span class="p-1.5 rounded-lg bg-[#EDE9FE] text-[#5B21B6]"><i data-lucide="network" class="w-4 h-4"></i></span>
+                    <div>
+                        <h3 class="text-sm font-bold text-[#1E1B4B]" id="inspect-cluster-title">Incident Cluster Inspection</h3>
+                        <p class="text-xs text-[#6B7280]" id="inspect-cluster-subtitle">Grouped Neighbor Complaints</p>
+                    </div>
+                </div>
+                <button onclick="closeClusterModal()" class="text-[#6B7280] hover:text-[#1E1B4B]"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+
+            <div class="text-xs text-[#1E1B4B] space-y-1">
+                <div><strong>Locality:</strong> <span id="inspect-cluster-loc">North Ward</span></div>
+                <div><strong>Clustering Rule:</strong> Complaints within 250m radius & 48-hour window</div>
+                <div><strong>Dispatched Work Order:</strong> Single crew assigned to junction</div>
+            </div>
+
+            <div class="border border-[#DDD6FE] rounded-xl overflow-hidden max-h-60 overflow-y-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-[#F5F3FF] text-[#5B21B6] uppercase text-[10px] tracking-wider border-b border-[#DDD6FE]">
+                        <tr>
+                            <th class="py-2 px-3">Ticket #</th>
+                            <th class="py-2 px-3">Street Landmark</th>
+                            <th class="py-2 px-3">Status</th>
+                            <th class="py-2 px-3">Logged</th>
+                            <th class="py-2 px-3 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inspect-cluster-tbody" class="divide-y divide-[#DDD6FE]">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="flex items-center justify-between pt-2">
+                <button id="inspect-cluster-override-btn" onclick="promptIncidentPriorityOverride()" class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs font-semibold rounded-xl flex items-center space-x-1.5 transition">
+                    <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
+                    <span>Supervisor Priority Override</span>
+                </button>
+                <button onclick="closeClusterModal()" class="btn-royal-secondary px-4 py-2 text-xs">Close</button>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <!-- Modal 3: Complete Work Order & Record Resolution (Service Team) -->
+    <div id="resolve-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="royal-card max-w-md w-full p-6">
+            <div class="flex items-center justify-between border-b border-[#DDD6FE] pb-3 mb-4">
+                <h3 class="text-base font-bold text-[#1E1B4B]">Record Investigation & Resolution</h3>
+                <button onclick="closeResolveModal()" class="text-[#6B7280] hover:text-[#1E1B4B]"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form onsubmit="submitWorkOrderResolution(event)" class="space-y-4">
+                <input type="hidden" id="resolve-complaint-id">
+                <div>
+                    <label class="block text-xs font-semibold text-[#1E1B4B] mb-1">Investigation & Action Taken <span class="text-rose-500">*</span></label>
+                    <textarea id="resolve-notes" required rows="3" placeholder="e.g. Isolated 400mm main valve, replaced fractured cast-iron collar, restored normal 3.2 bar pressure..." class="w-full text-xs p-2.5"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-[#1E1B4B] mb-1">Proof Photo URL (Demonstration)</label>
+                    <input type="text" id="resolve-photo-url" value="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=400&q=80" class="w-full text-xs p-2.5">
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeResolveModal()" class="btn-royal-secondary px-4 py-2 text-xs">Cancel</button>
+                    <button type="submit" class="btn-royal-primary px-4 py-2 text-xs">Mark as Resolved</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    
+
+    <!-- Modal 4: Escalate Overdue Work Order (Service Team) -->
+    <div id="escalate-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="royal-card max-w-md w-full p-6">
+            <div class="flex items-center justify-between border-b border-[#DDD6FE] pb-3 mb-4">
+                <div class="flex items-center space-x-2">
+                    <span class="p-1.5 rounded-lg bg-rose-100 text-rose-700"><i data-lucide="alert-triangle" class="w-4 h-4"></i></span>
+                    <h3 class="text-base font-bold text-[#1E1B4B]">Escalate Overdue Work Order</h3>
+                </div>
+                <button onclick="closeEscalateModal()" class="text-[#6B7280] hover:text-[#1E1B4B]"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form onsubmit="submitWorkOrderEscalation(event)" class="space-y-4">
+                <input type="hidden" id="escalate-complaint-id">
+                <p class="text-xs text-[#6B7280]">Escalating will notify the Ward Supervisor and mark this ticket as an emergency priority item.</p>
+                <div>
+                    <label class="block text-xs font-semibold text-[#1E1B4B] mb-1">Reason for Escalation <span class="text-rose-500">*</span></label>
+                    <textarea id="escalate-reason" required rows="3" placeholder="e.g. Ruptured pipe is under high-traffic carriageway; requires road excavation permit and backhoe loader..." class="w-full text-xs p-2.5"></textarea>
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeEscalateModal()" class="btn-royal-secondary px-4 py-2 text-xs">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow">Confirm Escalation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    
+
+    <!-- Modal 5: Merge Complaint into Master Incident (Admin / Supervisor) -->
+    <div id="merge-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="royal-card max-w-md w-full p-6">
+            <div class="flex items-center justify-between border-b border-[#DDD6FE] pb-3 mb-4">
+                <div class="flex items-center space-x-2">
+                    <span class="p-1.5 rounded-lg bg-[#EDE9FE] text-[#5B21B6]"><i data-lucide="git-merge" class="w-4 h-4"></i></span>
+                    <h3 class="text-base font-bold text-[#1E1B4B]">Merge into Master Incident</h3>
+                </div>
+                <button onclick="closeMergeModal()" class="text-[#6B7280] hover:text-[#1E1B4B]"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form onsubmit="submitIncidentMerge(event)" class="space-y-4">
+                <input type="hidden" id="merge-complaint-id">
+                <div>
+                    <span class="text-[10px] text-[#6B7280] uppercase font-bold">Selected Complaint Reference</span>
+                    <div id="merge-complaint-label" class="font-mono text-xs font-bold text-[#5B21B6] mt-0.5">CMP-2026-XXXXX</div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-[#1E1B4B] mb-1">Target Master Incident <span class="text-rose-500">*</span></label>
+                    <select id="merge-target-incident" required class="w-full text-xs p-2.5 bg-white border border-[#DDD6FE] rounded-xl focus:outline-none focus:ring-1 focus:ring-[#7C3AED]">
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-[#1E1B4B] mb-1">Correlation Justification <span class="text-rose-500">*</span></label>
+                    <textarea id="merge-reason" required rows="2" placeholder="Correlated root-cause failure along main trunk line distribution network..." class="w-full text-xs p-2.5 bg-white border border-[#DDD6FE] rounded-xl"></textarea>
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeMergeModal()" class="btn-royal-secondary px-4 py-2 text-xs">Cancel</button>
+                    <button type="submit" class="btn-royal-primary px-4 py-2 text-xs flex items-center space-x-1">
+                        <i data-lucide="git-merge" class="w-3.5 h-3.5"></i>
+                        <span>Confirm Merge</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    
+
+
+    <!-- Modal 6: Complaint Record Details (Admin / Field) -->
+    <div id="details-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="royal-card max-w-lg w-full p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-[#DDD6FE] pb-3">
+                <div class="flex items-center space-x-2">
+                    <span class="p-1.5 rounded-lg bg-[#EDE9FE] text-[#5B21B6]"><i data-lucide="file-text" class="w-4 h-4"></i></span>
+                    <h3 class="text-base font-bold text-[#1E1B4B]">Complaint Record Details</h3>
+                </div>
+                <button onclick="closeDetailsModal()" class="text-[#6B7280] hover:text-[#1E1B4B]"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div class="grid grid-cols-2 gap-3 bg-[#F5F3FF] p-3 rounded-xl border border-[#DDD6FE]">
+                    <div>
+                        <span class="text-[10px] text-[#6B7280] uppercase font-bold">Ticket Number</span>
+                        <div id="details-ticket-number" class="font-mono font-bold text-[#5B21B6] mt-0.5">--</div>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-[#6B7280] uppercase font-bold">Status / Priority</span>
+                        <div id="details-status-priority" class="font-semibold text-[#1E1B4B] mt-0.5">--</div>
+                    </div>
+                </div>
+                <div>
+                    <span class="text-[10px] text-[#6B7280] uppercase font-bold">Locality & Landmark</span>
+                    <div id="details-landmark" class="font-medium text-[#1E1B4B] mt-0.5 bg-white p-2.5 rounded-lg border border-[#DDD6FE]">--</div>
+                </div>
+                <div>
+                    <span class="text-[10px] text-[#6B7280] uppercase font-bold">Citizen Description</span>
+                    <div id="details-description" class="text-[#4B5563] mt-0.5 bg-white p-2.5 rounded-lg border border-[#DDD6FE] whitespace-pre-wrap">--</div>
+                </div>
+            </div>
+            <div class="flex justify-end pt-2">
+                <button type="button" onclick="closeDetailsModal()" class="btn-royal-primary px-4 py-2 text-xs">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="clustering-toast" class="fixed bottom-6 right-6 max-w-sm bg-[#5B21B6] text-white p-4 rounded-xl shadow-2xl border border-[#A78BFA] z-50 hidden transition-all duration-300">
+        <div class="flex items-start space-x-3">
+            <div class="p-2 bg-[#4C1D95] rounded-lg text-purple-200 flex-shrink-0">
+                <i data-lucide="sparkles" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold text-white uppercase tracking-wider">Geospatial Clustering Triggered</h4>
+                <p id="toast-message" class="text-xs text-[#DDD6FE] mt-1">Grouped with nearby neighborhood reports.</p>
+            </div>
+            <button onclick="document.getElementById('clustering-toast').classList.add('hidden')" class="text-purple-300 hover:text-white">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </div>
+
+    
+
+    <!-- ================================================================= -->
+    <!-- FOOTER                                                            -->
+    <!-- ================================================================= -->
+    <footer class="bg-white border-t border-[#DDD6FE] py-6 text-center text-xs text-[#6B7280]">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center space-x-2">
+                <div class="w-5 h-5 rounded bg-[#5B21B6] text-white flex items-center justify-center text-[10px]">
+                    <i data-lucide="droplet" class="w-3.5 h-3.5 fill-white"></i>
+                </div>
+                <p><strong>NIVORA</strong> — Civic Water Supply & Complaint Infrastructure</p>
+            </div>
+            <p class="text-[#6B7280]">Phase 2 Light Purple & Royal Elegant Edition • Powered by Haversine Geospatial Clustering & Synthetic Data</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="/js/app.js"></script>
+</body>
+</html>

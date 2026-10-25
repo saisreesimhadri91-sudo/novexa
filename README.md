@@ -8,6 +8,7 @@ Proposed solution:
 -Identify repeated water supply problems.
 -Track service tickets and resolution status.
 -Protect residents' personal details.
+
 Features:
 1. Interactive Complaint Mapping – Displays water-supply complaints by locality and ward.
 2. Smart Complaint Registration – Records water interruptions, low pressure and supply issues.
@@ -21,6 +22,7 @@ Features:
 10. Automated Notifications – Alerts staff about high-priority or overdue complaints.
 11. Data-Driven Prioritization – Helps municipal teams prioritize inspections based on complaint patterns.
 12. Scalable System – Supports expansion across multiple wards and localities.
+    
 Technology Stack:
 1	Python -	Backend logic, APIs, and data processing
 2	Flask	Web framework for backend APIs

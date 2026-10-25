@@ -121,6 +121,8 @@
         </div>
     </div>
 
+    
+
     <!-- ================================================================= -->
     <!-- MAIN APPLICATION CONTAINER                                        -->
     <!-- ================================================================= -->
@@ -880,6 +882,8 @@
         </div>
     </div>
 
+    
+
     <!-- Modal 1: Complaint Submission Success with Reference Number -->
     <div id="success-reference-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="royal-card max-w-md w-full p-6 space-y-4">
@@ -910,6 +914,8 @@
             </div>
         </div>
     </div>
+
+    
 
     <!-- Modal 2: Inspect Recurring Incident Cluster Grouping -->
     <div id="cluster-inspect-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
@@ -958,6 +964,8 @@
         </div>
     </div>
 
+    
+
     <!-- Modal 3: Complete Work Order & Record Resolution (Service Team) -->
     <div id="resolve-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="royal-card max-w-md w-full p-6">
@@ -983,6 +991,8 @@
         </div>
     </div>
 
+    
+
     <!-- Modal 4: Escalate Overdue Work Order (Service Team) -->
     <div id="escalate-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="royal-card max-w-md w-full p-6">
@@ -1007,6 +1017,8 @@
             </form>
         </div>
     </div>
+
+    
 
     <!-- Modal 5: Merge Complaint into Master Incident (Admin / Supervisor) -->
     <div id="merge-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
@@ -1045,6 +1057,45 @@
         </div>
     </div>
 
+    
+
+
+    <!-- Modal 6: Complaint Record Details (Admin / Field) -->
+    <div id="details-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="royal-card max-w-lg w-full p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-[#DDD6FE] pb-3">
+                <div class="flex items-center space-x-2">
+                    <span class="p-1.5 rounded-lg bg-[#EDE9FE] text-[#5B21B6]"><i data-lucide="file-text" class="w-4 h-4"></i></span>
+                    <h3 class="text-base font-bold text-[#1E1B4B]">Complaint Record Details</h3>
+                </div>
+                <button onclick="closeDetailsModal()" class="text-[#6B7280] hover:text-[#1E1B4B]"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div class="grid grid-cols-2 gap-3 bg-[#F5F3FF] p-3 rounded-xl border border-[#DDD6FE]">
+                    <div>
+                        <span class="text-[10px] text-[#6B7280] uppercase font-bold">Ticket Number</span>
+                        <div id="details-ticket-number" class="font-mono font-bold text-[#5B21B6] mt-0.5">--</div>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-[#6B7280] uppercase font-bold">Status / Priority</span>
+                        <div id="details-status-priority" class="font-semibold text-[#1E1B4B] mt-0.5">--</div>
+                    </div>
+                </div>
+                <div>
+                    <span class="text-[10px] text-[#6B7280] uppercase font-bold">Locality & Landmark</span>
+                    <div id="details-landmark" class="font-medium text-[#1E1B4B] mt-0.5 bg-white p-2.5 rounded-lg border border-[#DDD6FE]">--</div>
+                </div>
+                <div>
+                    <span class="text-[10px] text-[#6B7280] uppercase font-bold">Citizen Description</span>
+                    <div id="details-description" class="text-[#4B5563] mt-0.5 bg-white p-2.5 rounded-lg border border-[#DDD6FE] whitespace-pre-wrap">--</div>
+                </div>
+            </div>
+            <div class="flex justify-end pt-2">
+                <button type="button" onclick="closeDetailsModal()" class="btn-royal-primary px-4 py-2 text-xs">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div id="clustering-toast" class="fixed bottom-6 right-6 max-w-sm bg-[#5B21B6] text-white p-4 rounded-xl shadow-2xl border border-[#A78BFA] z-50 hidden transition-all duration-300">
         <div class="flex items-start space-x-3">
@@ -1060,6 +1111,8 @@
             </button>
         </div>
     </div>
+
+    
 
     <!-- ================================================================= -->
     <!-- FOOTER                                                            -->

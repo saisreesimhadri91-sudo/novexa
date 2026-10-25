@@ -997,6 +997,7 @@ def start_server(port=None, host=None):
     port = port or int(os.environ.get("PORT", 8000))
     host = host or os.environ.get("HOST", "127.0.0.1")
     server_address = (host, port)
+    ThreadingHTTPServer.allow_reuse_address = True
     httpd = ThreadingHTTPServer(server_address, NivoraAPIHandler)
     print(f"============================================================")
     print(f" NIVORA — Intelligent Water Supply Complaint Management")
